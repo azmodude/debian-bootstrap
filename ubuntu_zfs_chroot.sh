@@ -2,7 +2,7 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt install --yes cryptsetup curl patch
+apt install --yes cryptsetup curl patch git
 
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
     dpkg-reconfigure tzdata
@@ -17,12 +17,12 @@ EOF
 dpkg-reconfigure locales
 
 cat > /etc/default/keyboard <<-EOF
-XKBMODEL="pc105"
-XKBLAYOUT="de"
-XKBVARIANT="nodeadkeys"
-XKBOPTIONS=""
+	XKBMODEL="pc105"
+	XKBLAYOUT="de"
+	XKBVARIANT="nodeadkeys"
+	XKBOPTIONS=""
 
-BACKSPACE="guess"
+	BACKSPACE="guess"
 EOF
 dpkg-reconfigure keybord-configuration
 
