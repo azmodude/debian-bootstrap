@@ -25,3 +25,10 @@ done
 # disable root password
 usermod -p '*' root
 
+# install NetworkManager and let netplan know about it
+apt-get install --yes network-manager
+cat > /etc/netplan/01-network-manager-all.yaml <<- EOF
+	network:
+	  version: 2
+	  renderer: NetworkManager
+EOF
