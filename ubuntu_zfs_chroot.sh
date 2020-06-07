@@ -2,7 +2,7 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt install --yes cryptsetup curl patch git
+apt install --yes cryptsetup curl patch git keyboard-configuration console-setup
 
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
     dpkg-reconfigure tzdata
