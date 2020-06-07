@@ -6,7 +6,7 @@ UUID="$(dd if=/dev/urandom of=/dev/stdout bs=1 count=100 2>/dev/null |
 ROOT_DS="$(zfs list -o name | awk '/ROOT\/ubuntu_/{print $1;exit}')"
 zfs create -o com.ubuntu.zsys:bootfs-datasets="${ROOT_DS}" \
     -o canmount=on -o mountpoint=/home/azmo \
-    rpool/USERDATA/username_"${UUID}"
+    rpool/USERDATA/azmo_"${UUID}"
 adduser --uid 1337 azmo
 cp -a /etc/skel/. /home/azmo
 chown -R azmo:azmo /home/azmo

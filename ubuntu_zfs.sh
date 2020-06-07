@@ -165,9 +165,6 @@ partition_zfs() {
     zfs create -o com.ubuntu.zsys:bootfs-datasets=rpool/ROOT/ubuntu_"${UUID}" \
         -o canmount=on -o mountpoint=/root \
         rpool/USERDATA/root_"${UUID}"
-    zfs create -o com.ubuntu.zsys:bootfs=no \
-        -o canmount=on -o mountpoint=/home \
-        rpool/USERDATA/home_"${UUID}"
 
     zpool export bpool
     zpool export rpool
