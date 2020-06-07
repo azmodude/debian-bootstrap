@@ -50,6 +50,16 @@ setup() {
             exit 3
         fi
     fi
+    if [ -z "${GRUB_PASSWORD}" ]; then
+        bootstrap_dialog --title "Grub Password" --passwordbox "Please enter a strong password for protecting the bootloader.\n" 8 60
+        GRUB_PASSWORD="$dialog_result"
+        bootstrap_dialog --title "Grub Password" --passwordbox "Please re-enter password to verify.\n" 8 60
+        GRUB_PASSWORD_VERIFY="$dialog_result"
+        if [[ "${GRUB_PASSWORD}" != "${GRUB_PASSWORD_VERIFY}" ]]; then
+            echo "Passwords did not match."
+            exit 3
+        fi
+    fi
 
     if [ -z "${ROOT_PASSWORD}" ]; then
         bootstrap_dialog --title "Root password" --passwordbox "Please enter a strong password for the root user.\n" 8 60
@@ -195,13 +205,16 @@ END
     mount --rbind /proc /mnt/proc
     mount --rbind /sys  /mnt/sys
 
+    set -vx
     cp "$(pwd)/ubuntu_zfs_chroot.sh" /mnt/tmp
     chroot /mnt /usr/bin/env \
         INSTALL_DISK="${INSTALL_DISK}" \
         UUID="${UUID}" \
         ROOT_PASSWORD="${ROOT_PASSWORD}" \
+        GRUB_PASSWORD="${GRUB_PASSWORD}" \
         IS_EFI="${IS_EFI}" \
         /bin/bash --login -c /tmp/ubuntu_zfs_chroot.sh
+    set +vx
 
     cp "$(pwd)/ubuntu_zfs_firstboot.sh" /mnt/root
 }

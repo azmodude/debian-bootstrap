@@ -67,6 +67,16 @@ addgroup --system sambashare
 curl https://launchpadlibrarian.net/478315221/2150-fix-systemd-dependency-loops.patch | \
 sed "s|/etc|/lib|;s|\.in$||" | (cd / ; patch -p1)
 
+# grub password protection
+GRUB_PASSWORD_HASH=$(echo -e "${GRUB_PASSWORD}\n${GRUB_PASSWORD}" | \
+    grub-mkpasswd-pbkdf2 | awk '/grub.pbkdf/{print$NF}')
+cat > /etc/grub.d/40_password <<-EOF
+	set superusers="admin"
+	password_pbkdf2 admin ${GRUB_PASSWORD_HASH}
+EOF
+chown root:root /etc/grub.d/40_password
+chmod 600 /etc/grub.d/40_password
+
 grub-probe /boot
 update-initramfs -c -k all
 

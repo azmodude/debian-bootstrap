@@ -4,6 +4,7 @@ export UBUNTU_TREE="focal"
 export HOSTNAME_FQDN="test"
 export SWAP_SIZE="1"
 export ENCRYPTION_PASSPHRASE="testtest"
+export GRUB_PASSWORD="testtest"
 export ROOT_PASSWORD="testtest"
 
 apt-get update && apt-get install --yes zfsutils-linux
