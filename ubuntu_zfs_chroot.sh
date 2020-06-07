@@ -24,7 +24,9 @@ cat > /etc/default/keyboard <<-EOF
 
 	BACKSPACE="guess"
 EOF
-dpkg-reconfigure keybord-configuration
+dpkg-reconfigure keyboard-configuration
+
+sed -r -i 's/^FONTFACE=.*/FONTFACE="Terminus"/' /etc/default/console-setup
 
 echo "Setting root passwd"
 echo "root:${ROOT_PASSWORD}" | chpasswd
