@@ -221,8 +221,8 @@ END
 
 function teardown() {
     swapoff -a
-    mount | grep -v zfs | tac | awk '/\/mnt/ {print $3}' | \
-        xargs -i{} umount -l {}
+    umount -lR /mnt
+    sleep 5
     zpool export -a
 }
 
