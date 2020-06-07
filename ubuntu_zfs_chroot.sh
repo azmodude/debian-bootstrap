@@ -71,11 +71,16 @@ sed "s|/etc|/lib|;s|\.in$||" | (cd / ; patch -p1)
 GRUB_PASSWORD_HASH=$(echo -e "${GRUB_PASSWORD}\n${GRUB_PASSWORD}" | \
     grub-mkpasswd-pbkdf2 | awk '/grub.pbkdf/{print$NF}')
 cat > /etc/grub.d/40_password <<-EOF
+	#!/bin/sh
+	set -e
+
+	cat << END
 	set superusers="admin"
 	password_pbkdf2 admin ${GRUB_PASSWORD_HASH}
+	END
 EOF
 chown root:root /etc/grub.d/40_password
-chmod 600 /etc/grub.d/40_password
+chmod 700 /etc/grub.d/40_password
 
 grub-probe /boot
 update-initramfs -c -k all
