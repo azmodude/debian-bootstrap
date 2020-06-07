@@ -202,6 +202,8 @@ END
         ROOT_PASSWORD="${ROOT_PASSWORD}" \
         IS_EFI="${IS_EFI}" \
         /bin/bash --login -c /tmp/ubuntu_zfs_chroot.sh
+
+    cp "$(pwd)/ubuntu_zfs_firstboot.sh" /mnt/root
 }
 
 function teardown() {
