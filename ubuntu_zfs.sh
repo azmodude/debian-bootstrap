@@ -4,7 +4,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 bootstrap_dialog() {
-    dialog_result=$(dialog --clear --stdout --backtitle "Arch bootstrapper" --no-shadow "$@" 2>/dev/null)
+    dialog_result=$(dialog --clear --stdout --backtitle "Debian/Ubuntu ZFS bootstrapper" --no-shadow "$@" 2>/dev/null)
 }
 
 setup() {
@@ -12,10 +12,10 @@ setup() {
 	      apt-get -y install dialog
 
     if [ -z "${UBUNTU_TREE}" ]; then
-        bootstrap_dialog --title "Debian Tree" \
-                         --menu "Install which Debian tree?" 0 0 0 \
-                         "focal" "stable" \
-                         "sid" "unstable"
+        bootstrap_dialog --title "Ubuntu Tree" \
+                         --menu "Install which Ubuntu tree?" 0 0 0 \
+                         "focal" "lts" \
+                         "focal" "latest"
         UBUNTU_TREE="${dialog_result}"
     fi
 
