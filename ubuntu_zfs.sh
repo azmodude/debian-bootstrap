@@ -8,9 +8,6 @@ bootstrap_dialog() {
 }
 
 setup() {
-    apt-get update && \
-	      apt-get -y install dialog
-
     if [ -z "${UBUNTU_TREE}" ]; then
         bootstrap_dialog --title "Ubuntu Tree" \
                          --menu "Install which Ubuntu tree?" 0 0 0 \
@@ -82,12 +79,13 @@ setup() {
     [ -d /sys/firmware/efi ] && IS_EFI=1 || IS_EFI=0
     echo -n "Using ${INSTALL_DISK} and performing "
     [[ ${IS_EFI} -eq 1 ]] && echo "UEFI install."
-    [[ ! ${IS_EFI} -eq 1 ]] && echo "legacy BIOS install."
+    [[ ${IS_EFI} -ne 1 ]] && echo "legacy BIOS install."
 }
 
 preinstall() {
     apt-add-repository universe && apt-get update
-    apt install --yes debootstrap gdisk zfs-initramfs zfsutils-linux cryptsetup
+    apt install --yes debootstrap gdisk zfs-initramfs zfsutils-linux \
+        cryptsetup dialog
     systemctl stop zed
     modprobe zfs
 }
@@ -95,7 +93,7 @@ preinstall() {
 partition_zfs() {
     sgdisk --zap-all "${INSTALL_DISK}"
     sgdisk -n1:1M:+512M -t1:EF00 "${INSTALL_DISK}"
-    [[ ! ${IS_EFI} -eq 1 ]] && sgdisk -a1 -n5:24k:+1000K -t5:EF02 "${INSTALL_DISK}"
+    [[ ${IS_EFI} -ne 1 ]] && sgdisk -a1 -n5:24k:+1000K -t5:EF02 "${INSTALL_DISK}"
     sgdisk -n2:0:+"${SWAP_SIZE}G" -t2:8200 "${INSTALL_DISK}"
     sgdisk -n3:0:+2G -t3:BE00 "${INSTALL_DISK}"
     sgdisk -n4:0:0 -t4:BF00 "${INSTALL_DISK}"
@@ -205,7 +203,6 @@ END
     mount --rbind /proc /mnt/proc
     mount --rbind /sys  /mnt/sys
 
-    set -vx
     cp "$(pwd)/ubuntu_zfs_chroot.sh" /mnt/tmp
     chroot /mnt /usr/bin/env \
         INSTALL_DISK="${INSTALL_DISK}" \
@@ -214,7 +211,6 @@ END
         GRUB_PASSWORD="${GRUB_PASSWORD}" \
         IS_EFI="${IS_EFI}" \
         /bin/bash --login -c /tmp/ubuntu_zfs_chroot.sh
-    set +vx
 
     cp "$(pwd)/ubuntu_zfs_firstboot.sh" /mnt/root
 }
@@ -231,8 +227,8 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 
-setup
 preinstall
+setup
 partition_zfs
 install
 teardown
