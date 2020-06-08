@@ -105,7 +105,9 @@ partition_zfs() {
     zpool labelclear -f "${INSTALL_DISK}-part4" || true
 
     zpool create \
-        -o ashift=12 -d \
+        -o ashift=12 \
+        -o autotrim=on \
+        -d \
         -o feature@async_destroy=enabled \
         -o feature@bookmarks=enabled \
         -o feature@embedded_data=enabled \
