@@ -46,13 +46,15 @@ setup() {
         fi
     fi
     if [ -z "${GRUB_PASSWORD}" ]; then
-        bootstrap_dialog --title "Grub Password" --passwordbox "Please enter a strong password for protecting the bootloader.\n" 8 60
+        bootstrap_dialog --title "Grub Password" --passwordbox "Please enter a strong password for protecting the bootloader.\n(Leave empty to disable)" 8 60
         GRUB_PASSWORD="$dialog_result"
-        bootstrap_dialog --title "Grub Password" --passwordbox "Please re-enter password to verify.\n" 8 60
-        GRUB_PASSWORD_VERIFY="$dialog_result"
-        if [[ "${GRUB_PASSWORD}" != "${GRUB_PASSWORD_VERIFY}" ]]; then
-            echo "Passwords did not match."
-            exit 3
+        if [[ -n "${GRUB_PASSWORD}" ]]; then
+            bootstrap_dialog --title "Grub Password" --passwordbox "Please re-enter password to verify.\n" 8 60
+            GRUB_PASSWORD_VERIFY="$dialog_result"
+            if [[ "${GRUB_PASSWORD}" != "${GRUB_PASSWORD_VERIFY}" ]]; then
+                echo "Passwords did not match."
+                exit 3
+            fi
         fi
     fi
 
