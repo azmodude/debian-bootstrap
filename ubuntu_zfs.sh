@@ -214,7 +214,8 @@ END
         IS_EFI="${IS_EFI}" \
         /bin/bash --login -c /tmp/ubuntu_zfs_chroot.sh
 
-    cp "$(pwd)/ubuntu_zfs_firstboot.sh" /mnt/root
+    cp "$(pwd)/ubuntu_zfs_firstboot.sh" \
+        "$(pwd)/ubuntu_zfs_bootstrap.sh" /mnt/root
 }
 
 function teardown() {
