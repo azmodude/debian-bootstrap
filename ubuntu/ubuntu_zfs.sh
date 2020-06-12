@@ -1,4 +1,7 @@
 #!/bin/bash
+# This quite closely follows the official guide at
+# https://openzfs.github.io/openzfs-docs/Getting%20Started/Ubuntu/Ubuntu%2020.04%20Root%20on%20ZFS.html
+
 export DEBIAN_FRONTEND=noninteractive
 
 bootstrap_dialog() {
