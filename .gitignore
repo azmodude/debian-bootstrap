@@ -1,2 +1,2 @@
 *.vdi
-.vagrant/**
+**/.vagrant/**
