@@ -27,7 +27,7 @@ cat > /etc/default/keyboard <<-EOF
 	XKBMODEL="pc105"
 	XKBLAYOUT="de"
 	XKBVARIANT="nodeadkeys"
-	XKBOPTIONS=""
+	XKBOPTIONS="caps:escape"
 
 	BACKSPACE="guess"
 EOF
