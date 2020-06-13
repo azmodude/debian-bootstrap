@@ -90,6 +90,12 @@ setup() {
 }
 
 preinstall() {
+    # if we are running in a Debian live CD, reenable the real
+    # update-initramfs
+    if [[ "$(readlink /sbin/update-initramfs)" == "/bin/live-update-initramfs" ]]; then
+        rm -f /sbin/update-initramfs
+        mv /sbin/update-initramfs.orig.initramfs-tools /sbin/update-initramfs
+    fi
     echo "deb https://deb.debian.org/debian buster main contrib non-free" > /etc/apt/sources.list
     echo "deb https://deb.debian.org/debian buster-backports main contrib non-free" >> /etc/apt/sources.list
     apt-get update
