@@ -3,8 +3,6 @@
 # This quite closely follows the official guide at
 # https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/Debian%20Buster%20Root%20on%20ZFS.html
 
-set -e
-
 export DEBIAN_FRONTEND=noninteractive
 
 bootstrap_dialog() {
