@@ -76,9 +76,9 @@ EOF
 # grub
 if [[ "${IS_EFI}" -eq 1 ]]; then
   apt-get install --yes dosfstools
-  mkdosfs -F 32 -n EFI "${INSTALL_DISK}"-part2
+  mkdosfs -F 32 -n EFI "${INSTALL_DISK}"-part1
   mkdir /boot/efi
-echo PARTUUID="$(blkid -s PARTUUID -o value "${INSTALL_DISK}"-part2)" \
+echo PARTUUID="$(blkid -s PARTUUID -o value "${INSTALL_DISK}"-part1)" \
       /boot/efi vfat nofail,x-systemd.device-timeout=1 0 1 >> /etc/fstab
   mount /boot/efi
   apt-get install --yes grub-efi-amd64 shim-signed
