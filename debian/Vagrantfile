@@ -3,7 +3,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/contrib-buster64"
    config.vm.provider "virtualbox" do |vb|
-     disk_file = '../zfs.vdi'
+     disk_file = 'debian_zfs.vdi'
      vb.memory = "2048"
      vb.cpus = 3
      unless File.exist?(disk_file)
