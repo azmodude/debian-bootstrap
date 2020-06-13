@@ -1,17 +1,17 @@
 #!/bin/bash
+
+# This quite closely follows the official guide at
+# https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/Debian%20Buster%20Root%20on%20ZFS.html
+
 set -e
-set -vx
 
 export DEBIAN_FRONTEND=noninteractive
 
 bootstrap_dialog() {
-    dialog_result=$(dialog --clear --stdout --backtitle "Arch bootstrapper" --no-shadow "$@" 2>/dev/null)
+    dialog_result=$(dialog --clear --stdout --backtitle "Debian/Ubuntu ZFS bootstrapper" --no-shadow "$@" 2>/dev/null)
 }
 
 setup() {
-    apt-get update && \
-	      apt-get -y install dialog
-
     if [ -z "${DEBIAN_TREE}" ]; then
         bootstrap_dialog --title "Debian Tree" \
                          --menu "Install which Debian tree?" 0 0 0 \
@@ -52,6 +52,19 @@ setup() {
         fi
     fi
 
+    if [ -z "${GRUB_PASSWORD}" ]; then
+        bootstrap_dialog --title "Grub Password" --passwordbox "Please enter a strong password for protecting the bootloader.\n(Leave empty to disable)" 8 60
+        GRUB_PASSWORD="$dialog_result"
+        if [[ -n "${GRUB_PASSWORD}" ]]; then
+            bootstrap_dialog --title "Grub Password" --passwordbox "Please re-enter password to verify.\n" 8 60
+            GRUB_PASSWORD_VERIFY="$dialog_result"
+            if [[ "${GRUB_PASSWORD}" != "${GRUB_PASSWORD_VERIFY}" ]]; then
+                echo "Passwords did not match."
+                exit 3
+            fi
+        fi
+    fi
+
     if [ -z "${ROOT_PASSWORD}" ]; then
         bootstrap_dialog --title "Root password" --passwordbox "Please enter a strong password for the root user.\n" 8 60
         ROOT_PASSWORD="$dialog_result"
@@ -70,18 +83,17 @@ setup() {
         exit 1
     fi
 
-    grep vendor_id /proc/cpuinfo | grep -q Intel && IS_INTEL_CPU=1 ||
-        IS_INTEL_CPU=0
-    grep vendor_id /proc/cpuinfo | grep -q AMD && IS_AMD_CPU=1 ||
-        IS_AMD_CPU=0
     [ -d /sys/firmware/efi ] && IS_EFI=1 || IS_EFI=0
+    echo -n "Using ${INSTALL_DISK} and performing "
+    [[ ${IS_EFI} -eq 1 ]] && echo "UEFI install."
+    [[ ${IS_EFI} -ne 1 ]] && echo "legacy BIOS install."
 }
 
 preinstall() {
     echo "deb https://deb.debian.org/debian buster main contrib non-free" > /etc/apt/sources.list
     echo "deb https://deb.debian.org/debian buster-backports main contrib non-free" >> /etc/apt/sources.list
     apt-get update
-    apt-get install --yes debootstrap gdisk dkms dpkg-dev \
+    apt-get install --yes dialog debootstrap gdisk dkms dpkg-dev \
             linux-headers-"$(uname -r)"
     apt-get install --yes -t buster-backports --no-install-recommends zfs-dkms
     modprobe zfs
@@ -102,7 +114,9 @@ partition_zfs() {
     zpool labelclear -f "${INSTALL_DISK}-part3" || true
 
     zpool create \
-        -o ashift=12 -d \
+        -o ashift=12 \
+        -o autotrim=on \
+        -d \
         -o feature@async_destroy=enabled \
         -o feature@bookmarks=enabled \
         -o feature@embedded_data=enabled \
@@ -119,6 +133,7 @@ partition_zfs() {
         -O devices=off -O normalization=formD -O relatime=on -O xattr=sa \
         -O mountpoint=/boot -R /mnt \
         bpool "${INSTALL_DISK}-part2"
+
     echo "$ENCRYPTION_PASSPHRASE" | \
         zpool create \
         -o ashift=12 \
@@ -141,6 +156,7 @@ partition_zfs() {
 
     zfs create                                          rpool/home
     zfs create -o mountpoint=/root                      rpool/home/root
+    zfs create                                          rpool/srv
     zfs create -o canmount=off -o mountpoint=/var       rpool/var
     zfs create                                          rpool/var/log
     zfs create -o canmount=off -o mountpoint=/var/lib   rpool/var/lib
@@ -172,7 +188,7 @@ partition_zfs() {
 }
 
 install() {
-    debootstrap ${DEBIAN_TREE} /mnt
+    debootstrap "${DEBIAN_TREE}" /mnt
 	  echo "Configuring hostname"
 	  echo "${HOSTNAME_FQDN}" > /mnt/etc/hostname
 	  cat > /mnt/etc/hosts <<- END
@@ -180,13 +196,13 @@ install() {
 127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
 END
     cat > /mnt/etc/apt/sources.list <<- END
-deb http://deb.debian.org/debian "${DEBIAN_TREE}" main contrib non-free
-deb-src http://deb.debian.org/debian "${DEBIAN_TREE}" main contrib non-free
+deb http://deb.debian.org/debian ${DEBIAN_TREE} main contrib non-free
+deb-src http://deb.debian.org/debian ${DEBIAN_TREE} main contrib non-free
 END
     if [[ "${DEBIAN_TREE}" != "sid" ]]; then
         cat > /mnt/etc/apt/sources.list.d/"${DEBIAN_TREE}"-backports.list <<- END
-deb http://deb.debian.org/debian "${DEBIAN_TREE}"-backports main contrib non-free
-deb-src http://deb.debian.org/debian "{DEBIAN_TREE}"-buster-backports main contrib non-free
+deb http://deb.debian.org/debian ${DEBIAN_TREE}-backports main contrib non-free
+deb-src http://deb.debian.org/debian ${DEBIAN_TREE}-backports main contrib non-free
 END
         cat > /mnt/etc/apt/preferences.d/90_zfs <<-END
 Package: libnvpair1linux libuutil1linux libzfs2linux libzfslinux-dev libzpool2linux python3-pyzfs pyzfs-doc spl spl-dkms zfs-dkms zfs-dracut zfs-initramfs zfs-test zfsutils-linux zfsutils-linux-dev zfs-zed
@@ -194,100 +210,34 @@ Pin: release n=buster-backports
 Pin-Priority: 990
 END
     fi
+
+    echo /dev/zvol/rpool/swap none swap discard 0 0 > /mnt/etc/fstab
+
     mount --rbind /dev  /mnt/dev
     mount --rbind /proc /mnt/proc
     mount --rbind /sys  /mnt/sys
 
-    echo /dev/zvol/rpool/swap none swap discard 0 0 > /mnt/etc/fstab
-
+    cp "$(pwd)/debian_zfs_chroot.sh" /mnt/tmp
     chroot /mnt /usr/bin/env \
            INSTALL_DISK="${INSTALL_DISK}" \
            ROOT_PASSWORD="${ROOT_PASSWORD}" \
-           IS_EFI="${IS_EFI}"
-           bash <<- EOF
-    ln -s /proc/self/mounts /etc/mtab
+           GRUB_PASSWORD="${GRUB_PASSWORD}" \
+           IS_EFI="${IS_EFI}" \
+           /bin/bash --login -c /tmp/debian_zfs_chroot.sh
 
-    apt-get update
-    apt-get install --yes locales sed popularity-contest \
-          dpkg-dev console-setup linux-headers-amd64 \
-          linux-image-amd64 zfs-initramfs zfs-dkms
-    echo REMAKE_INITRD=yes > /etc/dkms/zfs.conf
-
-    dpkg-reconfigure locales
-    dpkg-reconfigure tzdata
-
-    echo "Setting root passwd"
-    echo "root:${ROOT_PASSWORD}" | chpasswd
-
-    cat > /etc/systemd/system/zfs-import-bpool.service <<- END
-	[Unit]
-	DefaultDependencies=no
-	Before=zfs-import-scan.service
-	Before=zfs-import-cache.service
-
-	[Service]
-	Type=oneshot
-	RemainAfterExit=yes
-	ExecStart=/sbin/zpool import -N -o cachefile=none bpool
-
-	[Install]
-	WantedBy=zfs-import.target
-	END
-    systemctl daemon-reload
-    systemctl enable zfs-import-bpool.service
-
-    cp /usr/share/systemd/tmp.mount /etc/systemd/system/
-    systemctl enable tmp.mount
-
-    # grub
-    if [[ ${IS_EFI} -eq 1 ]]; then
-      apt-get install --yes dosfstools
-      mkdosfs -F 32 -n EFI ${INSTALL_DISK}-part2
-      mkdir /boot/efi
-      echo PARTUUID=$(blkid -s PARTUUID -o value ${INSTALL_DISK}-part2) \
-          /boot/efi vfat nofail,x-systemd.device-timeout=1 0 1 >> /etc/fstab
-      mount /boot/efi
-      apt-get install --yes grub-efi-amd64 shim-signed
-    fi
-    if [[ ! ${IS_EFI} -eq 1 ]]; then
-       apt-get install --yes grub-pc
-    fi
-
-    dpkg --purge os-prober
-
-    grub-probe /boot
-    update-initramfs -c -k all
-    sed -i -r 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="root=ZFS=rpool\/ROOT\/debian"/' /etc/default/grub
-    sed -i -r 's/^(GRUB_CMDLINE_LINUX_DEFAULT=.*)/#\1/' /etc/default/grub
-    sed -i -r 's/#(GRUB_TERMINAL=console)/\1/' /etc/default/grub
-    update-grub
-
-    [[ ${IS_EFI} -eq 1 ]] && \
-      grub-install --target=x86_64-efi --efi-directory=/boot/efi \
-                   --bootloader-id=debian --recheck --no-floppy
-    [[ ! ${IS_EFI} -eq 1 ]] && \
-      grub-install --target=i386-pc ${INSTALL_DISK}
-
-    mkdir /etc/zfs/zfs-list.cache
-    touch /etc/zfs/zfs-list.cache/bpool
-    touch /etc/zfs/zfs-list.cache/rpool
-    ln -s /usr/lib/zfs-linux/zed.d/history_event-zfs-list-cacher.sh /etc/zfs/zed.d
-    touch /etc/zfs/zfs-list.cache/{b,r}pool
-    zed && sleep 5 && pkill zed
-    sed -Ei "s|/mnt/?|/|" /etc/zfs/zfs-list.cache/*
-EOF
+    cp "$(pwd)/debian_zfs_firstboot.sh" \
+        "$(pwd)/debian_zfs_bootstrap.sh" /mnt/root
 }
 
 function teardown() {
+    swapoff -a
     mount | grep -v zfs | tac | awk '/\/mnt/ {print $3}' | \
         xargs -i{} umount -lf {}
-    swapoff -a
     zpool export -a
 }
 
-
-setup
 preinstall
+setup
 partition_zfs
 install
 teardown
