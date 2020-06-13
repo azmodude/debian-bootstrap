@@ -41,21 +41,24 @@ sed -r -i 's/^FONTFACE=.*/FONTFACE="Terminus"/' /etc/default/console-setup
 echo "Setting root passwd"
 echo "root:${ROOT_PASSWORD}" | chpasswd
 
+cp /usr/share/systemd/tmp.mount /etc/systemd/system/
 cat > /etc/systemd/system/zfs-import-bpool.service <<- END
-[Unit]
-DefaultDependencies=no
-Before=zfs-import-scan.service
-Before=zfs-import-cache.service
+	[Unit]
+	DefaultDependencies=no
+	Before=zfs-import-scan.service
+	Before=zfs-import-cache.service
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/sbin/zpool import -N -o cachefile=none bpool
+	[Service]
+	Type=oneshot
+	RemainAfterExit=yes
+	ExecStart=/sbin/zpool import -N -o cachefile=none bpool
 
-[Install]
-WantedBy=zfs-import.target
+	[Install]
+	WantedBy=zfs-import.target
 END
+
 systemctl daemon-reload
+systemctl enable tmp.mount
 systemctl enable zfs-import-bpool.service
 
 cp /usr/share/systemd/tmp.mount /etc/systemd/system/
