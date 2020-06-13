@@ -151,8 +151,7 @@ partition_zfs() {
     zfs create -o canmount=noauto -o mountpoint=/ rpool/ROOT/debian
     zfs mount rpool/ROOT/debian
 
-    zfs create -o canmount=noauto -o mountpoint=/boot bpool/BOOT/debian
-    zfs mount bpool/BOOT/debian
+    zfs create -o canmount=on -o mountpoint=/boot bpool/BOOT/debian
 
     zfs create                                          rpool/home
     zfs create -o mountpoint=/root                      rpool/home/root
