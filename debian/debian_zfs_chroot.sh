@@ -61,8 +61,17 @@ systemctl daemon-reload
 systemctl enable tmp.mount
 systemctl enable zfs-import-bpool.service
 
-cp /usr/share/systemd/tmp.mount /etc/systemd/system/
-systemctl enable tmp.mount
+# fix some debian issues with systemd-tmpfiles races
+mkdir -p /etc/systemd/system/console-setup.service.d
+cat > /etc/systemd/system/console-setup.service.d/override.conf <<-EOF
+	[Unit]
+	After=systemd-tmpfiles-setup.service
+EOF
+mkdir -p /etc/systemd/system/keyboard-setup.service.d
+cat > /etc/systemd/system/keyboard-setup.service.d/override.conf <<-EOF
+	[Unit]
+	After=systemd-tmpfiles-setup.service
+EOF
 
 # grub
 if [[ "${IS_EFI}" -eq 1 ]]; then
