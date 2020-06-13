@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export DEBIAN_TREE="buster"
+export DEBIAN_TREE="sid"
 export HOSTNAME_FQDN="test"
 export SWAP_SIZE="1"
 export ENCRYPTION_PASSPHRASE="testtest"

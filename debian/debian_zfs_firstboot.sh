@@ -7,7 +7,7 @@ apt-get install --yes sudo
 
 # create home dataset and user
 zfs create -o canmount=on -o mountpoint=/home/"${user}" \
-    rpool/"${user}"
+    rpool/home/"${user}"
 adduser --uid "${uid}" "${user}"
 cp -a /etc/skel/. /home/"${user}"
 chown -R "${user}":"${user}" /home/"${user}"
