@@ -172,6 +172,9 @@ partition_zfs() {
     zfs create rpool/ROOT/ubuntu_"${UUID}"/var/snap
     zfs create rpool/ROOT/ubuntu_"${UUID}"/var/spool
     zfs create rpool/ROOT/ubuntu_"${UUID}"/var/www
+    # not following guide here for docker/libvirt datasets
+    zfs create rpool/ROOT/ubuntu_"${UUID}"/var/lib/docker
+    zfs create rpool/ROOT/ubuntu_"${UUID}"/var/lib/libvirt
 
     zfs create -o canmount=off -o mountpoint=/ \
         rpool/USERDATA
