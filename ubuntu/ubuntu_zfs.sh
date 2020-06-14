@@ -87,7 +87,7 @@ setup() {
 
 preinstall() {
     apt-add-repository universe && apt-get update
-    apt install --yes debootstrap gdisk zfs-initramfs zfsutils-linux \
+    apt-get install --yes debootstrap gdisk zfs-initramfs zfsutils-linux \
         cryptsetup dialog
     systemctl stop zed
     modprobe zfs

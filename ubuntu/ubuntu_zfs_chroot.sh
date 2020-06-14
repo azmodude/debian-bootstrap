@@ -2,7 +2,8 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt install --yes cryptsetup curl patch git keyboard-configuration console-setup
+apt-get install --yes cryptsetup curl patch git keyboard-configuration \
+    console-setup
 
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime && \
     dpkg-reconfigure tzdata
@@ -32,7 +33,7 @@ echo "Setting root passwd"
 echo "root:${ROOT_PASSWORD}" | chpasswd
 
 # grub
-apt install --yes dosfstools
+apt-get install --yes dosfstools
 
 mkdosfs -F 32 -s 1 -n EFI "${INSTALL_DISK}"-part1
 mkdir /boot/efi
