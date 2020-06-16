@@ -1,16 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/contrib-buster64"
-   config.vm.provider "virtualbox" do |vb|
-     disk_file = 'debian_zfs.vdi'
-     vb.memory = "2048"
-     vb.cpus = 3
-     unless File.exist?(disk_file)
-       vb.customize ['createhd', '--filename', disk_file, '--size', 20 * 1024]
-     end
-#     vb.customize ['storagectl', :id, '--name', 'Custom Controller', '--add', 'sata']
-     vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk_file]
-##     vb.customize ["modifyvm", :id, "--firmware", "efi"]
+  config.vm.define :debianzfs do |zfs|
+    zfs.vm.box = "debian/contrib-buster64"
+    zfs.ssh.forward_agent = true
+    zfs.vm.synced_folder "..", "/vagrant"
+    zfs.vm.provider "virtualbox" do |vb|
+       disk_file = 'debian_zfs.vdi'
+       vb.memory = "2048"
+       vb.cpus = 3
+       unless File.exist?(disk_file)
+         vb.customize ['createhd', '--filename', disk_file, '--size', 20 * 1024]
+       end
+  #     vb.customize ['storagectl', :id, '--name', 'Custom Controller', '--add', 'sata']
+       vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk_file]
+  ##     vb.customize ["modifyvm", :id, "--firmware", "efi"]
+    end
   end
 end
