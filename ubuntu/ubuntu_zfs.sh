@@ -109,8 +109,11 @@ partition_zfs() {
     # not following guide here for docker/libvirt datasets
     # see https://didrocks.fr/2020/06/16/zfs-focus-on-ubuntu-20.04-lts-zsys-dataset-layout/
     # and persistent datasets there
+    zfs create -o canmount=off rpool/var
+    zfs create -o canmount=off rpool/var/lib
     zfs create rpool/var/lib/docker
     zfs create rpool/var/lib/libvirt
+    zfs create rpool/var/lib/machines
 
     zfs create -o canmount=off -o mountpoint=/ \
         rpool/USERDATA
