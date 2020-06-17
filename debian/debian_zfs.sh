@@ -5,9 +5,10 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-curdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-# shellcheck disable=SC1090
-source "${curdir}/../common/setup.sh"
+cd "${BASH_SOURCE%/*}/" || exit # cd into the bundle and use relative paths
+source "../common/variables.sh"
+source "../common/setup.sh"
+source "../common/teardown.sh"
 
 setup_specific() {
     if [ -z "${DEBIAN_TREE}" ]; then
@@ -125,11 +126,10 @@ partition_zfs() {
 
 install() {
     debootstrap "${DEBIAN_TREE}" /mnt
-	  echo "Configuring hostname"
 	  echo "${HOSTNAME_FQDN}" > /mnt/etc/hostname
 	  cat > /mnt/etc/hosts <<- END
 127.0.0.1   localhost.localdomain localhost
-127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
+127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME_FQDN%%.*}
 END
     cat > /mnt/etc/apt/sources.list <<- END
 deb http://deb.debian.org/debian ${DEBIAN_TREE} main contrib non-free
@@ -165,12 +165,10 @@ END
         "$(pwd)/debian_zfs_bootstrap.sh" /mnt/root
 }
 
-function teardown() {
-    swapoff -a
-    mount | grep -v zfs | tac | awk '/\/mnt/ {print $3}' | \
-        xargs -i{} umount -lf {}
-    zpool export -a
-}
+if [ "$(id -u)" != 0 ]; then
+    echo "Please execute with root rights."
+    exit 1
+fi
 
 preinstall
 setup_specific

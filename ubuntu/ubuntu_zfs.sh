@@ -4,9 +4,9 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-curdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-# shellcheck disable=SC1090
-source "${curdir}/../common/setup.sh"
+cd "${BASH_SOURCE%/*}/" || exit # cd into the bundle and use relative paths
+source "../common/variables.sh"
+source "../common/setup.sh"
 
 setup_specific() {
     if [ -z "${UBUNTU_TREE}" ]; then
@@ -134,11 +134,10 @@ partition_zfs() {
 
 install() {
     debootstrap "${UBUNTU_TREE}" /mnt
-    echo "Configuring hostname"
     echo "${HOSTNAME_FQDN}" > /mnt/etc/hostname
     cat > /mnt/etc/hosts <<- END
 		127.0.0.1   localhost.localdomain localhost
-		127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME%%.*}
+		127.0.1.1   ${HOSTNAME_FQDN} ${HOSTNAME_FQDN%%.*}
 END
     cat > /mnt/etc/apt/sources.list <<- END
 		deb http://archive.ubuntu.com/ubuntu ${UBUNTU_TREE} main restricted universe multiverse
@@ -162,13 +161,6 @@ END
 
     cp "$(pwd)/ubuntu_zfs_firstboot.sh" \
         "$(pwd)/ubuntu_zfs_bootstrap.sh" /mnt/root
-}
-
-function teardown() {
-    swapoff -a
-    umount -lR /mnt
-    sleep 5
-    zpool export -a
 }
 
 if [ "$(id -u)" != 0 ]; then
