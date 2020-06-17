@@ -44,7 +44,7 @@ mkdir /boot/efi/grub /boot/grub
 echo /boot/efi/grub /boot/grub none defaults,bind 0 0 >> /etc/fstab
 mount /boot/grub
 
-if [[ ${IS_EFI} -eq 1 ]]; then
+if [ "${IS_EFI}" = true ]; then
     apt-get --yes install grub-efi-amd64 grub-efi-amd64-signed \
     linux-image-generic shim-signed
 else
@@ -97,10 +97,10 @@ sed -i -r 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=5\nGRUB_RECORDFAIL_TIMEOUT=5/' \
 sed -i -r 's/#(GRUB_TERMINAL=console)/\1/' /etc/default/grub
 update-grub
 
-[[ ${IS_EFI} -eq 1 ]] && \
+[ "${IS_EFI}" = true ] && \
     grub-install --target=x86_64-efi --efi-directory=/boot/efi \
         --bootloader-id=ubuntu --recheck --no-floppy
-[[ ! ${IS_EFI} -eq 1 ]] && \
+[ "${IS_EFI}" = false ] && \
   grub-install --target=i386-pc "${INSTALL_DISK}"
 
 mkdir /etc/zfs/zfs-list.cache

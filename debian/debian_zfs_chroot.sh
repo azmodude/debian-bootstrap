@@ -74,7 +74,7 @@ cat > /etc/systemd/system/keyboard-setup.service.d/override.conf <<-EOF
 EOF
 
 # grub
-if [[ "${IS_EFI}" -eq 1 ]]; then
+if [ "${IS_EFI}" = true ]; then
   apt-get install --yes dosfstools
   mkdosfs -F 32 -n EFI "${INSTALL_DISK}"-part1
   mkdir /boot/efi
@@ -83,7 +83,7 @@ echo PARTUUID="$(blkid -s PARTUUID -o value "${INSTALL_DISK}"-part1)" \
   mount /boot/efi
   apt-get install --yes grub-efi-amd64 shim-signed
 fi
-if [[ ! "${IS_EFI}" -eq 1 ]]; then
+if [ "${IS_EFI}" = false ]; then
    apt-get install --yes grub-pc
 fi
 # only needed in dualboot scenarios
@@ -113,10 +113,10 @@ sed -i -r 's/^(GRUB_CMDLINE_LINUX_DEFAULT=.*)/#\1\nGRUB_CMDLINE_LINUX_DEFAULT="c
 sed -i -r 's/#(GRUB_TERMINAL=console)/\1/' /etc/default/grub
 update-grub
 
-[[ ${IS_EFI} -eq 1 ]] && \
+[ "${IS_EFI}" = true ] && \
   grub-install --target=x86_64-efi --efi-directory=/boot/efi \
                --bootloader-id=debian --recheck --no-floppy
-[[ ! ${IS_EFI} -eq 1 ]] && \
+[ "${IS_EFI}" = false ] && \
   grub-install --target=i386-pc "${INSTALL_DISK}"
 
 mkdir /etc/zfs/zfs-list.cache

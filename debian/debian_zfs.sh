@@ -39,8 +39,8 @@ preinstall() {
 
 partition_zfs() {
     sgdisk --zap-all "${INSTALL_DISK}"
-    [[ ${IS_EFI} -eq 1 ]] && sgdisk -n1:1M:+512M -t1:EF00 "${INSTALL_DISK}"
-    [[ ! ${IS_EFI} -eq 1 ]] && sgdisk -n1:1M:+1M -t1:EF02 "${INSTALL_DISK}"
+    [ "${IS_EFI}" = true ] && sgdisk -n1:1M:+512M -t1:EF00 "${INSTALL_DISK}"
+    [ "${IS_EFI}" = false ] && sgdisk -n1:1M:+1M -t1:EF02 "${INSTALL_DISK}"
     sgdisk -n2:0:+1G -t2:BF01 "${INSTALL_DISK}"
     sgdisk -n3:0:0 -t3:BF00 "${INSTALL_DISK}"
 
