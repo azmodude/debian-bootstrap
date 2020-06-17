@@ -168,10 +168,17 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 
+echo "${green}Getting installation environment ready${reset}"
 preinstall
+echo "${green}Asking setup specific questions${reset}"
 setup_specific
 setup
+echo "${green}Partitioning and setting up ZFS structures${reset}"
 partition_zfs
+echo "${green}Performing installation${reset}"
 install
+echo "${green}Tearing down installation environment${reset}"
 teardown
+echo -n "${green}Installation done. Check scripts in /root after reboot "
+echo "to perform initial bootstrapping"
 
