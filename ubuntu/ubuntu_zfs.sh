@@ -7,6 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 cd "${BASH_SOURCE%/*}/" || exit # cd into the bundle and use relative paths
 source "../common/variables.sh"
 source "../common/setup.sh"
+source "../common/teardown.sh"
 
 setup_specific() {
     if [ -z "${UBUNTU_TREE}" ]; then
