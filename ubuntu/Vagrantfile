@@ -16,5 +16,11 @@ Vagrant.configure("2") do |config|
       vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', disk_file]
 ##     vb.customize ["modifyvm", :id, "--firmware", "efi"]
     end
+    #zfs.vm.provision "shell", path: "./vagrant_provision.sh"
+    # this does not seem to work
+#   zfs.trigger.after :provision do |t|
+#     t.name = "Reboot after provisioning"
+#     t.run = { :inline => "vagrant reload" }
+#   end
   end
 end
