@@ -93,12 +93,17 @@ partition_zfs() {
 
     zfs create                                          rpool/home
     zfs create -o mountpoint=/root                      rpool/home/root
+    zfs create -o canmount=off                          rpool/usr
+    zfs create                                          rpool/usr/local
+    zfs create                                          rpool/opt
     zfs create                                          rpool/srv
     zfs create -o canmount=off -o mountpoint=/var       rpool/var
     zfs create                                          rpool/var/log
     zfs create -o canmount=off -o mountpoint=/var/lib   rpool/var/lib
     zfs create -o com.sun:auto-snapshot=false           rpool/var/lib/docker
     zfs create -o com.sun:auto-snapshot=false           rpool/var/lib/libvirt
+    zfs create                                          rpool/var/lib/AccountsService
+    zfs create                                          rpool/var/snap
     zfs create                                          rpool/var/spool
     zfs create -o com.sun:auto-snapshot=false           rpool/var/cache
     zfs create -o com.sun:auto-snapshot=false           rpool/var/tmp
