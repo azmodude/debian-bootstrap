@@ -13,7 +13,7 @@ zfs create -o com.ubuntu.zsys:bootfs-datasets="${ROOT_DS}" \
 adduser --uid "${uid}" "${user}"
 cp -a /etc/skel/. /home/"${user}"
 chown -R "${user}":"${user}" /home/"${user}"
-usermod -a -G adm,cdrom,dip,lpadmin,lxd,plugdev,sambashare,sudo "${user}"
+usermod -a -G users,adm,cdrom,dip,lpadmin,lxd,plugdev,sambashare,sudo "${user}"
 
 # install standard cli environment
 apt-get install --yes ubuntu-standard

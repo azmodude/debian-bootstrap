@@ -11,7 +11,7 @@ zfs create -o canmount=on -o mountpoint=/home/"${user}" \
 adduser --uid "${uid}" "${user}"
 cp -a /etc/skel/. /home/"${user}"
 chown -R "${user}":"${user}" /home/"${user}"
-usermod -a -G adm,lp,lpadmin,plugdev,netdev,audio,video,cdrom,sudo "${user}"
+usermod -a -G users,adm,lp,lpadmin,plugdev,netdev,audio,video,cdrom,sudo "${user}"
 
 # don't compress logfiles, zfs does that for us
 for file in /etc/logrotate.d/* ; do
