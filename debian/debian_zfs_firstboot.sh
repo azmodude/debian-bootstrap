@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 user="azmo"
 uid="1337"
 
@@ -20,7 +22,11 @@ for file in /etc/logrotate.d/* ; do
     fi
 done
 
-# disable root password
-usermod -p '*' root
+read -p "Disable root password? (y/n)? " -r choice
+case "$choice" in
+  y|Y ) usermod -p '*' root;;
+  n|N ) echo "Leaving root password untouched";;
+  * ) echo "Invalid. Leaving root password untouched";;
+esac
 
 apt-get install --yes network-manager
