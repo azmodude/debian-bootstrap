@@ -62,6 +62,10 @@ systemctl daemon-reload
 systemctl enable tmp.mount
 systemctl enable zfs-import-bpool.service
 
+addgroup --system lpadmin
+addgroup --system lxd
+addgroup --system sambashare
+
 # fix some debian issues with systemd-tmpfiles races
 mkdir -p /etc/systemd/system/console-setup.service.d
 cat > /etc/systemd/system/console-setup.service.d/override.conf <<-EOF
