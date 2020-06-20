@@ -6,7 +6,8 @@ ln -s /proc/self/mounts /etc/mtab
 apt-get update
 apt-get install --yes locales sed popularity-contest \
       dpkg-dev console-setup linux-headers-amd64 \
-      linux-image-amd64 zfs-initramfs zfs-dkms \
+      linux-image-amd64 firmware-misc-nonfree firmware-iwlwifi \
+      zfs-initramfs zfs-dkms \
       curl patch git keyboard-configuration console-setup
 
 echo REMAKE_INITRD=yes > /etc/dkms/zfs.conf
