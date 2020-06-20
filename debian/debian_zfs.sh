@@ -84,6 +84,7 @@ partition_zfs() {
         rpool "${INSTALL_DISK}-part3"
 
     zfs create -o canmount=off -o mountpoint=none rpool/ROOT
+    zfs create -o canmount=off -o mountpoint=none rpool/USERDATA
     zfs create -o canmount=off -o mountpoint=none bpool/BOOT
 
     zfs create -o canmount=noauto -o mountpoint=/ rpool/ROOT/debian
