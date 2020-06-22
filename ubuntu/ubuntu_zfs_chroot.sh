@@ -88,7 +88,7 @@ fi
 grub-probe /boot
 update-initramfs -c -k all
 
-sed -i -r 's/^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"/GRUB_CMDLINE_LINUX_DEFAULT="init_on_alloc=0 consoleblank=600 \1"/' /etc/default/grub
+sed -i -r 's/^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"/GRUB_CMDLINE_LINUX_DEFAULT="init_on_alloc=0 consoleblank=300 \1"/' /etc/default/grub
 sed -i -r 's/\bquiet\b//' /etc/default/grub
 sed -i -r 's/\bsplash\b//' /etc/default/grub
 sed -i -r 's/^(GRUB_TIMEOUT_STYLE=hidden)/#\1/' /etc/default/grub

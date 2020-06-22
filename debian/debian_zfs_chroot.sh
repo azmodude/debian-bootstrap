@@ -114,7 +114,7 @@ fi
 grub-probe /boot
 update-initramfs -c -k all
 sed -i -r 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="root=ZFS=rpool\/ROOT\/debian"/' /etc/default/grub
-sed -i -r 's/^(GRUB_CMDLINE_LINUX_DEFAULT=.*)/#\1\nGRUB_CMDLINE_LINUX_DEFAULT="consoleblank=600"/' /etc/default/grub
+sed -i -r 's/^(GRUB_CMDLINE_LINUX_DEFAULT=.*)/#\1\nGRUB_CMDLINE_LINUX_DEFAULT="consoleblank=300"/' /etc/default/grub
 sed -i -r 's/#(GRUB_TERMINAL=console)/\1/' /etc/default/grub
 update-grub
 
